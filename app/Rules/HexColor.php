@@ -17,6 +17,7 @@ class HexColor implements ValidationRule
     {
         if (! is_string($value)) {
             $fail(__('The :attribute must be a string.'));
+
             return;
         }
 

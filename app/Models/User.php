@@ -8,11 +8,13 @@ use App\Traits\HasUuid;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\User
@@ -20,26 +22,26 @@ use Illuminate\Notifications\Notifiable;
  * @property string $id
  * @property string|null $name
  * @property string|null $email
- * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string|null $password
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
- * @property-read \Illuminate\Database\Eloquent\Collection|RecurringExpense[] $recurringExpenses
- * @property-read \Illuminate\Database\Eloquent\Collection|InstallmentGroup[] $installmentGroups
- * @property-read \Illuminate\Database\Eloquent\Collection|Expense[] $expenses
- * @property-read \Illuminate\Database\Eloquent\Collection|SharedReport[] $sharedReports
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection|RecurringExpense[] $recurringExpenses
+ * @property-read Collection|InstallmentGroup[] $installmentGroups
+ * @property-read Collection|Expense[] $expenses
+ * @property-read Collection|SharedReport[] $sharedReports
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes, HasUuid;
+    use HasFactory, HasUuid, Notifiable, SoftDeletes;
 
     protected $keyType = 'string';
+
     public $incrementing = false;
 
     /**

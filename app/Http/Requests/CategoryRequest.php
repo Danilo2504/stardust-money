@@ -26,7 +26,7 @@ class CategoryRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'color' => ['nullable', new HexColor(allowAlpha:true)]
+            'color' => ['nullable', new HexColor(allowAlpha: true)],
         ];
     }
 }

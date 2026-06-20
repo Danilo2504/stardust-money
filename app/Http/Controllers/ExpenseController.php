@@ -8,19 +8,39 @@ use App\Models\Expense;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Yajra\DataTables\Facades\DataTables;
 
 class ExpenseController extends Controller
 {
     public function index(Request $request): View
     {
-        $expenses = Expense::listAll(
+        return view('pages.expenses.index');
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        $query = Expense::datatable(
             ExpenseFilter::fromRequest($request)
         );
 
-        return view('expenses.index', compact('expenses'));
+        return DataTables::query($query)
+            ->editColumn('amount', fn ($expense) => number_format((float) $expense->amount, 2, ',', '.'))
+            ->editColumn('expense_date', fn ($expense) => $expense->expense_date
+                ? $expense->expense_date->format('d/m/Y')
+                : '—')
+            ->editColumn('draft', fn ($expense) => $expense->draft
+                ? '<span class="badge bg-warning text-dark">Borrador</span>'
+                : '<span class="badge bg-success">Confirmado</span>')
+            ->editColumn('type', fn ($expense) => match ($expense->type) {
+                'one_time' => 'Único',
+                'recurring_child' => 'Recurrente',
+                'installment' => 'Cuota',
+                default => '—',
+            })
+            ->addColumn('actions', fn ($expense) => view('components.expenses.actions', compact('expense'))->render())
+            ->rawColumns(['draft', 'actions'])
+            ->toJson();
     }
-
-    
 
     public function store(ExpenseRequest $request): JsonResponse
     {

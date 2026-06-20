@@ -29,7 +29,7 @@ class CategoriesTableSeeder extends Seeder
             ['name' => 'Familia / Social', 'color' => '#3380FF'],
             ['name' => 'Mascotas', 'color' => '#80FF33'],
             ['name' => 'Suscripciones', 'color' => '#FF8033'],
-            ['name' => 'Varios', 'color' => '#8033FF']
+            ['name' => 'Varios', 'color' => '#8033FF'],
         ];
 
         $author = User::whereEmail('danilobautista2004@gmail.com')->first();
@@ -40,7 +40,7 @@ class CategoriesTableSeeder extends Seeder
                 [
                     'is_default' => true,
                     'user_id' => $author->id ?? null,
-                    'color' => $category['color']
+                    'color' => $category['color'],
                 ]
             );
         }

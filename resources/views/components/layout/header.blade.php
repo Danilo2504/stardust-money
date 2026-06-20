@@ -5,18 +5,22 @@
         </div>
 
         <div>
-        <strong>Mi Dashboard</strong>
+        <strong>{{ config('app.name', 'Stardust Money') }}</strong>
         </div>
 
         <div class="dropdown">
         <button class="btn btn-light dropdown-toggle user-menu" data-bs-toggle="dropdown">
-            Usuario
+            {{ Auth::user()->name ?? 'Usuario' }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="#">Perfil</a></li>
-            <li><a class="dropdown-item" href="#">Preferencias</a></li>
+            <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Perfil</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="#">Cerrar sesión</a></li>
+            <li>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="dropdown-item text-danger">Cerrar sesión</button>
+                </form>
+            </li>
         </ul>
         </div>
     </nav>

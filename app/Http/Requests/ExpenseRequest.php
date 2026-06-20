@@ -24,7 +24,7 @@ class ExpenseRequest extends FormRequest
     {
         return [
             'description' => 'required',
-            'code' => 'required|unique:expenses,code,' . $this->route('expense'),
+            'code' => 'required|unique:expenses,code,'.$this->route('expense'),
             'amount' => 'required|numeric|gt:0',
             'category_id' => 'nullable|exists:categories,id',
             'expense_date' => 'required|date',
@@ -33,7 +33,7 @@ class ExpenseRequest extends FormRequest
             'draft' => 'boolean',
             'recurring_expense_id' => 'required_if:type,recurring_child',
             'installment_group_id' => 'required_if:type,installment',
-            'installment_number' => 'required_if:type,installment'
+            'installment_number' => 'required_if:type,installment',
         ];
     }
 }

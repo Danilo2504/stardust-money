@@ -11,7 +11,7 @@ class CategoryController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $categories = Category::where('user_id', $request->user()->id)->get();
+        $categories = Category::where('user_id', $request->user()?->id)->get();
 
         return response()->json($categories);
     }
@@ -20,7 +20,7 @@ class CategoryController extends Controller
     {
         $category = Category::create([
             ...$request->validated(),
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()?->id,
         ]);
 
         return response()->json($category, 201);

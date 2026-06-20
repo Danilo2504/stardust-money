@@ -35,9 +35,6 @@
                     <p>€3,800</p>
                 </div>
             </div>
-            <div class="col-12">
-                <livewire:expenses.expense-form />
-            </div>
         </div>
     </div>
 @endsection

@@ -1,6 +1,12 @@
 <?php
 
+declare(strict_types=1);
+use App\Providers\AppServiceProvider;
+use App\Providers\FortifyServiceProvider;
+use App\Providers\ViewComposerServiceProvider;
+
 return [
-    App\Providers\AppServiceProvider::class,
-    App\Providers\ViewComposerServiceProvider::class,
+    AppServiceProvider::class,
+    FortifyServiceProvider::class,
+    ViewComposerServiceProvider::class,
 ];

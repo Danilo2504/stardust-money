@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\ExpenseSplit
@@ -12,10 +13,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $expense_id
  * @property string|null $person_name
  * @property float|null $amount
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read Expense|null $expense
  */
 class ExpenseSplit extends BaseModel

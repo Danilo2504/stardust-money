@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\Category
@@ -14,12 +15,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $name
  * @property string|null $color
  * @property bool|null $is_default
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
- * @property-read \Illuminate\Database\Eloquent\Collection|RecurringExpense[] $recurringExpenses
- * @property-read \Illuminate\Database\Eloquent\Collection|Expense[] $expenses
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection|RecurringExpense[] $recurringExpenses
+ * @property-read Collection|Expense[] $expenses
  * @property-read User|null $user
  */
 class Category extends BaseModel
@@ -31,13 +31,13 @@ class Category extends BaseModel
     protected $fillable = [
         'user_id',
         'name',
-        'color'
+        'color',
     ];
 
     protected $casts = [
         'is_default' => 'boolean',
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
 
     public static function listForSelect(?string $userId = null): Collection

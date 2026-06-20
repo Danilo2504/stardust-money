@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\RecurringExpense
@@ -16,15 +18,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $category_id
  * @property int|null $custom_interval_value
  * @property string|null $custom_interval_unit
- * @property \Illuminate\Support\Carbon|null $next_due_date
+ * @property Carbon|null $next_due_date
  * @property bool|null $is_active
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read User|null $user
  * @property-read Category|null $category
- * @property-read \Illuminate\Database\Eloquent\Collection|Expense[] $expenses
+ * @property-read Collection|Expense[] $expenses
  */
 class RecurringExpense extends BaseModel
 {

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\Query\JoinClause;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\Expense
@@ -23,19 +24,18 @@ use Illuminate\Database\Query\JoinClause;
  * @property string|null $category_id
  * @property string|null $notes
  * @property string|null $type
- * @property \Illuminate\Support\Carbon|null $expense_date
+ * @property Carbon|null $expense_date
  * @property string|null $recurring_expense_id
  * @property string|null $installment_group_id
  * @property int|null $installment_number
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read User|null $user
  * @property-read Category|null $category
  * @property-read RecurringExpense|null $recurringExpense
  * @property-read InstallmentGroup|null $installmentGroup
- * @property-read \Illuminate\Database\Eloquent\Collection|ExpenseSplit[] $splits
+ * @property-read Collection|ExpenseSplit[] $splits
  */
 class Expense extends BaseModel
 {
@@ -77,11 +77,34 @@ class Expense extends BaseModel
             ->get();
     }
 
+    public static function datatable(ExpenseFilter $filter): Builder
+    {
+        $query = (new static)->select([
+            'expenses.id',
+            'expenses.code',
+            'expenses.description',
+            'expenses.amount',
+            'expenses.type',
+            'expenses.expense_date',
+            'expenses.draft',
+            'expenses.user_id',
+            'expenses.category_id',
+            'categories.name as category_name',
+        ])
+            ->categoriesJoin()
+            ->recurringExpensesJoin()
+            ->installmentGroupsJoin();
+
+        return $filter->apply($query)
+            ->orderBy('expenses.expense_date', 'desc')
+            ->orderBy('expenses.created_at', 'desc');
+    }
+
     public function generateCode(): string
     {
         return str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
     }
-    
+
     #[Scope]
     protected function categoriesJoin(Builder $query): Builder
     {

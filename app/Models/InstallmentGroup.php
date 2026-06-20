@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\InstallmentGroup
@@ -14,12 +16,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $description
  * @property float|null $total_amount
  * @property int|null $total_installments
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- *
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read User|null $user
- * @property-read \Illuminate\Database\Eloquent\Collection|Expense[] $expenses
+ * @property-read Collection|Expense[] $expenses
  */
 class InstallmentGroup extends BaseModel
 {
