@@ -4,6 +4,16 @@
 
 @section('content')
     <div class="content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="m-0">Resumen</h4>
+            <button type="button"
+                    class="btn btn-accent"
+                    data-bs-toggle="modal"
+                    data-bs-target="#expenseModal">
+                <i class="bi bi-plus-lg me-1"></i> Registrar gasto
+            </button>
+        </div>
+
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="card card-custom balance-card p-4">
@@ -37,4 +47,6 @@
             </div>
         </div>
     </div>
+
+    @include('pages.expenses.form')
 @endsection

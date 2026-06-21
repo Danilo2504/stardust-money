@@ -69,6 +69,8 @@
         </div>
     </div>
 </div>
+
+@include('pages.expenses.form')
 @endsection
 
 @push('scripts')

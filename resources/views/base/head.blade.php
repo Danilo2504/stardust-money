@@ -8,4 +8,5 @@
 <link href="https://cdn.datatables.net/2.2.2/css/dataTables.bootstrap5.css" rel="stylesheet">
 <!-- Datepicker (Flatpickr) -->
 <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
-@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/main.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js'])
+@livewireStyles

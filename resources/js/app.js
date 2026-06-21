@@ -1,7 +1,10 @@
+$(document).ready(function() {
+    $('.select2').select2({
+        width: '100%',
+        placeholder: "Seleccionar..."
+    });
 
-
-import Alpine from 'alpinejs';
-
-window.Alpine = Alpine;
-
-Alpine.start();
+    $('.datepicker').flatpickr({
+        dateFormat: "Y-m-d"
+    });
+});

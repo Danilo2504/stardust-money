@@ -1,41 +1,30 @@
 <?php
 
-use Livewire\Component;
 use Livewire\Attributes\Computed;
-use App\Models\Expense;
+use Livewire\Component;
 use App\Models\Category;
+use App\Models\Expense;
 use App\Models\InstallmentGroup;
 use App\Models\RecurringExpense;
 
 new class extends Component
 {
-    public ?Expense $expense = null;
     public string $description = '';
-    public ?float $amount = null;
+    public string $type = 'one_time';
+    public string $amount = '';
     public ?string $category_id = null;
     public string $expense_date = '';
-    public ?string $notes = null;
-    public bool $draft = false;
-    
+    public string $notes = '';
+
     public ?string $installment_group_id = null;
     public ?int $installment_number = null;
     public ?string $recurring_expense_id = null;
 
     public array $splits = [];
 
-    public function getTypeProperty(): string
-    {
-        if ($this->installment_group_id) return 'installment';
-        if ($this->recurring_expense_id) return 'recurring_child';
-        return 'one_time';
-    }
-
     public function mount(): void
     {
-        $this->expense = Expense::create([
-            'user_id' => auth()->id(),
-            'draft'   => true,
-        ]);
+        $this->expense_date = now()->format('Y-m-d');
     }
 
     public function addSplit(): void
@@ -56,16 +45,17 @@ new class extends Component
     {
         return [
             'description'          => 'required',
-            'amount'               => 'required|numeric|gt:0',
+            'amount'               => 'required|numeric|gt:0|max:9999.9999',
             'category_id'          => 'nullable|exists:categories,id',
             'expense_date'         => 'required|date',
+            'type'                 => 'required|in:one_time,recurring_child,installment',
             'notes'                => 'nullable',
-            'installment_group_id' => $this->installment_group_id ? 'required' : 'nullable',
-            'installment_number'   => $this->installment_group_id ? 'required|integer' : 'nullable',
-            'recurring_expense_id' => $this->recurring_expense_id ? 'required' : 'nullable',
-            'splits' => 'array',
+            'installment_group_id' => $this->type === 'installment' ? 'required' : 'nullable',
+            'installment_number'   => $this->type === 'installment' ? 'required|integer' : 'nullable',
+            'recurring_expense_id' => $this->type === 'recurring_child' ? 'required' : 'nullable',
+            'splits'               => 'array',
             'splits.*.person_name' => 'required_with:splits.*.amount|string',
-            'splits.*.amount' => 'nullable|numeric|min:0',
+            'splits.*.amount'      => 'nullable|numeric|min:0',
         ];
     }
 
@@ -80,9 +70,10 @@ new class extends Component
             return;
         }
 
-        $this->expense->update([
+        $expense = Expense::create([
+            'user_id'              => auth()->id(),
+            'code'                 => (new Expense)->generateCode(),
             'description'          => $this->description,
-            'code'                 => $this->expense->generateCode(),
             'amount'               => $this->amount,
             'category_id'          => $this->category_id,
             'expense_date'         => $this->expense_date,
@@ -94,16 +85,39 @@ new class extends Component
             'draft'                => false,
         ]);
 
-        // elimino todos los splits asociados al expense (esto es para una futura funcionalidad de edicion)
-        $this->expense->splits()->delete();
-        
         foreach ($this->splits as $split) {
-            $this->expense->splits()->create([
-                'person_name'        => $split['person_name'],
-                'amount' => $split['amount'],
-                'user_id'            => auth()->id(),
+            $expense->splits()->create([
+                'person_name' => $split['person_name'],
+                'amount'      => $split['amount'],
+                'user_id'     => auth()->id(),
             ]);
         }
+
+        $this->resetForm();
+        $this->dispatch('expense-created');
+    }
+
+    private function resetForm(): void
+    {
+        $this->reset([
+            'description',
+            'amount',
+            'category_id',
+            'notes',
+            'type',
+            'installment_group_id',
+            'installment_number',
+            'recurring_expense_id',
+            'splits',
+        ]);
+        $this->type = 'one_time';
+        $this->expense_date = now()->format('Y-m-d');
+    }
+
+    #[Computed]
+    public function types()
+    {
+        return Expense::types();
     }
 
     #[Computed]
@@ -131,20 +145,24 @@ new class extends Component
 };
 ?>
 
-<form wire:submit="save">
+<form wire:submit="save"
+    x-data="{ type: @js($type) }">
     <!-- Descripción -->
     <div class="mb-3">
         <label class="form-label">Descripción</label>
-        <input type="text" wire:model="description" class="form-control" name="description" placeholder="Ej: Compra supermercado" required>
+        <input type="text" wire:model="description" class="form-control @error('description') is-invalid @enderror" name="description" placeholder="Ej: Compra supermercado" required>
+        @error('description')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="row">
         <!-- Monto -->
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <label class="form-label">Monto (€)</label>
             <div class="input-group">
                 <span class="input-group-text">€</span>
-                <input type="number" wire:model="amount" step="0.01" class="form-control" name="amount" placeholder="0.00" required>
+                <input type="number" wire:model="amount" step="0.01"  class="form-control @error('amount') is-invalid @enderror" name="amount" placeholder="0.00" required>
                 @error('amount')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -152,18 +170,35 @@ new class extends Component
         </div>
 
         <!-- Fecha -->
-        <div class="col-md-4 mb-3">
+        <div class="col-md-6 mb-3">
             <label class="form-label">Fecha</label>
-            <input type="text" wire:model="expense_date" class="form-control datepicker" name="expense_date" placeholder="Selecciona fecha" required>
+            <input type="text" wire:model="expense_date" value="{{$expense_date}}" class="form-control datepicker @error('expense_date') is-invalid @enderror" name="expense_date" placeholder="Selecciona fecha" required>
             @error('expense_date')
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+    </div>
 
+    <div class="row">
+        <!-- Type -->
+        <div class="col-md-12 mb-3">
+            <label class="form-label">Tipo de gasto</label>
+            <select class="form-select @error('type') is-invalid @enderror" name="type" wire:model="type" x-model="type">
+                @foreach($this->types as $type)
+                    <option value="{{ $type->value }}">{{ $type->name }}</option>
+                @endforeach
+            </select>
+            @error('type')
+                <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+    </div>
+
+    <div class="row">
         <!-- Categoría -->
-        <div class="col-md-4 mb-3">
+        <div class="col-md-12 mb-3">
             <label class="form-label">Categoría</label>
-            <select class="form-select" name="category_id" wire:model="category_id">
+            <select class="form-select @error('category_id') is-invalid @enderror" name="category_id" wire:model="category_id">
                 <option value="">Seleccionar...</option>
                 @foreach($this->categories as $category)
                     <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -175,25 +210,17 @@ new class extends Component
         </div>
     </div>
 
-    <div class="row">
-        <!-- Grupo de cuotas -->
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Grupo de cuotas</label>
-            <select class="form-select" name="installment_group_id" wire:model="installment_group_id" @disabled($recurring_expense_id)>
-                <option value="">Ninguno</option>
-                @foreach($this->installmentGroups as $group)
-                    <option value="{{ $group->id }}">{{ $group->description }}</option>
-                @endforeach
-            </select>
-            @error('installment_group_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
+    <div x-show="type === 'recurring_child'"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2">
         <!-- Gasto recurrente -->
-        <div class="col-md-6 mb-3">
+        <div class="col-md-12 mb-3">
             <label class="form-label">Gasto recurrente</label>
-            <select class="form-select" name="recurring_expense_id" wire:model="recurring_expense_id" @disabled($installment_group_id)>
+            <select class="form-select @error('recurring_expense_id') is-invalid @enderror" name="recurring_expense_id" wire:model="recurring_expense_id">
                 <option value="">Ninguno</option>
                 @foreach($this->recurringExpenses as $recurringExpense)
                     <option value="{{ $recurringExpense->id }}">{{ $recurringExpense->description }}</option>
@@ -205,16 +232,35 @@ new class extends Component
         </div>
     </div>
 
-    <div class="row">
-        @if($installment_group_id)
+    <div x-show="type === 'installment'"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 -translate-y-2"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 -translate-y-2">
+        <div class="row">
+            <!-- Grupo de cuotas -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Grupo de cuotas</label>
+                <select class="form-select @error('installment_group_id') is-invalid @enderror" name="installment_group_id" wire:model="installment_group_id">
+                    <option value="">Ninguno</option>
+                    @foreach($this->installmentGroups as $group)
+                        <option value="{{ $group->id }}">{{ $group->description }}</option>
+                    @endforeach
+                </select>
+                @error('installment_group_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
             <div class="col-md-6 mb-3">
                 <label class="form-label">Número de cuota</label>
-                <input type="number" name="installment_number" step="1" min="1" wire:model="installment_number" class="form-control">
+                <input type="number" name="installment_number" step="1" min="1" wire:model="installment_number" class="form-control @error('installment_number') is-invalid @enderror">
                 @error('installment_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-        @endif
+        </div>
     </div>
 
     <div class="row">
@@ -283,7 +329,7 @@ new class extends Component
     <!-- Notas -->
     <div class="mb-3">
         <label class="form-label">Notas</label>
-        <textarea class="form-control" name="notes" wire:model="notes" rows="2" placeholder="Opcional..."></textarea>
+        <textarea class="form-control @error('notes') is-invalid @enderror" name="notes" wire:model="notes" rows="2" placeholder="Opcional..."></textarea>
         @error('notes')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
@@ -292,7 +338,12 @@ new class extends Component
     <!-- Botones -->
     <div class="d-flex justify-content-end">
         <button type="reset" class="btn btn-outline-secondary me-2">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar Gasto</button>
+        <button type="submit" class="btn btn-primary">
+            Guardar Gasto
+            <div wire:loading>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            </div>
+        </button>
     </div>
 
 </form>
