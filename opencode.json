@@ -51,6 +51,21 @@
                 "ls": "allow",
                 "task": "deny"
             }
+        },
+        "chat": {
+            "description": "Agente de consultas. Usalo con @chat para hacer preguntas sobre el proyecto o preguntas generales. Responde sin generar ni modificar codigo.",
+            "mode": "subagent",
+            "model": "opencode-go/deepseek-v4-pro",
+            "temperature": 0.5,
+            "prompt": "Eres un asistente de consultas. Tu unico rol es responder preguntas — no escribes codigo, no modificas archivos, no ejecutas comandos.\n\nPodes hacer:\n- Responder preguntas generales: conceptos, patrones, buenas practicas, dudas tecnicas.\n- Responder preguntas sobre el proyecto si te lo piden explicitamente.\n- Leer archivos del proyecto SOLO si el usuario te lo pide de forma explicita (por ejemplo: 'busca en el codigo', 'fijate en el archivo X', 'lee el proyecto').\n\nNo haces:\n- No generas codigo.\n- No editas archivos.\n- No ejecutas comandos.\n- No buscas ni lees archivos por iniciativa propia, aunque creas que te ayudaria a responder mejor.\n- Si la pregunta requiere un cambio, explicas como hacerlo pero no lo haces vos.\n\nSe directo y conciso. Responde con tu conocimiento general por defecto. Si la pregunta es ambigua, pide clarificacion.",
+            "permission": {
+                "read": "deny",
+                "edit": "deny",
+                "glob": "deny",
+                "grep": "deny",
+                "bash": "deny",
+                "task": "deny"
+            }
         }
     }
 }
