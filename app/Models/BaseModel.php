@@ -46,7 +46,7 @@ abstract class BaseModel extends Model
 
         return $query->when(
             $userId,
-            fn (Builder $q) => $q->where($this->authorColumn, $userId)
+            fn (Builder $q) => $q->where($this->getTable().'.'.$this->authorColumn, $userId)
         );
     }
 

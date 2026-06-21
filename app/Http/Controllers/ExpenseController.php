@@ -23,7 +23,7 @@ class ExpenseController extends Controller
             ExpenseFilter::fromRequest($request)
         );
 
-        return DataTables::query($query)
+        return DataTables::eloquent($query)
             ->editColumn('amount', fn ($expense) => number_format((float) $expense->amount, 2, ',', '.'))
             ->editColumn('expense_date', fn ($expense) => $expense->expense_date
                 ? $expense->expense_date->format('d/m/Y')

@@ -10,5 +10,47 @@
                 "boost:mcp"
             ]
         }
+    },
+    "mode": {
+        "plan": {
+            "model": "opencode-go/glm-5.2",
+            "tools": {
+                "write": false,
+                "edit": false,
+                "bash": false
+            }
+        },
+        "build": {
+            "model": "opencode-go/minimax-m3",
+            "tools": {
+                "write": true,
+                "edit": true,
+                "bash": true
+            }
+        },
+        "code-reviewer": {
+            "description": "Revisa código Laravel buscando bugs, seguridad y malas prácticas",
+            "mode": "subagent",
+            "model": "opencode-go/kimi-k2.6",
+            "prompt": "Eres un senior Laravel developer. Revisá el código buscando: N+1 queries, mass assignment sin protección, lógica en Blade que debería estar en el controller/service, y violaciones a las convenciones de Laravel. Sé directo y concreto.",
+            "tools": { "write": false, "edit": false, "bash": false }
+        },
+        "debugger": {
+            "description": "Especialista en debugging de Go. Úsalo con @debugger cuando tengas un error, panic, comportamiento inesperado o bug en tu código Go.",
+            "mode": "subagent",
+            "model": "opencode-go/deepseek-v4-pro",
+            "temperature": 0.2,
+            "prompt": "Eres un experto en debugging de Go. Tu objetivo es identificar la causa raiz de errores de forma rapida y precisa.\n\n## Flujo de trabajo\n\n1. TRIAGE: Clasifica el error (compile error / runtime panic / logic bug / race condition / performance)\n2. LEE EL CONTEXTO: Usa read y grep para ver el codigo real antes de asumir\n3. HIPOTESIS: Plantea maximo 3 hipotesis ordenadas por probabilidad\n4. DIAGNOSTICO: Senala la linea exacta, explica por que ocurre, muestra el fix\n5. PREVENCION: Indica si hay un patron que evite que se repita\n\n## Formato de respuesta\n\nDIAGNOSTICO — causa raiz en 1-2 lineas\nUBICACION — archivo:linea\nPOR QUE OCURRE — explicacion tecnica concisa\nFIX — codigo corregido\nPREVENCION — patron o practica para evitarlo (si aplica)\n\n## Patrones Go que priorizas\n- Nil pointer dereference: retornos de error ignorados, interfaces nil\n- Goroutine leaks: canales sin close, context no cancelado\n- Race conditions: mapas concurrentes, variables sin mutex\n- Slice gotchas: backing array compartido, append fuera de cap\n- Defer + closures: variables capturadas por referencia en loops\n- Errores de interfaz: (*T)(nil) vs nil, type assertions sin ok\n\n## Herramientas segun sintoma\n- Race condition: go test -race ./...\n- Memory leak: pprof heap profile\n- Goroutine leak: pprof goroutine profile\n- Error de compilacion oscuro: go vet ./...\n- Deadlock: GOTRACEBACK=all + kill -SIGQUIT\n\nSe directo. Lee el codigo real. No hagas cambios destructivos sin confirmar primero.",
+            "permission": {
+                "read": "allow",
+                "write": "ask",
+                "edit": "ask",
+                "bash": "ask",
+                "glob": "allow",
+                "grep": "allow",
+                "ls": "allow",
+                "task": "deny"
+            }
+        }
     }
 }

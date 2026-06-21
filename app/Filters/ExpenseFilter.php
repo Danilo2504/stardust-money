@@ -2,7 +2,7 @@
 
 namespace App\Filters;
 
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class ExpenseFilter
@@ -32,7 +32,7 @@ class ExpenseFilter
             ->when(isset($this->filters['draft']),
                 fn ($q) => $q->where('draft', $this->filters['draft']))
             ->when($this->filters['category_id'] ?? null,
-                fn ($q, $v) => $q->where('category_id', $v))
+                fn ($q, $v) => $q->where('expenses.category_id', $v))
             ->when($this->filters['date_from'] ?? null,
                 fn ($q, $v) => $q->where('expense_date', '>=', $v))
             ->when($this->filters['date_to'] ?? null,

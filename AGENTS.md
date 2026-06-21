@@ -46,19 +46,19 @@ The Laravel Boost guidelines are specifically curated by Laravel maintainers for
 
 This application is a Laravel application and its main Laravel ecosystems package & versions are below. You are an expert with them all. Ensure you abide by these specific packages & versions.
 
-- php - 8.5
-- laravel/fortify (FORTIFY) - v1
-- laravel/framework (LARAVEL) - v13
-- laravel/prompts (PROMPTS) - v0
-- livewire/livewire (LIVEWIRE) - v4
-- laravel/boost (BOOST) - v2
-- laravel/breeze (BREEZE) - v2
-- laravel/mcp (MCP) - v0
-- laravel/pail (PAIL) - v1
-- laravel/pint (PINT) - v1
-- phpunit/phpunit (PHPUNIT) - v12
-- alpinejs (ALPINEJS) - v3
-- tailwindcss (TAILWINDCSS) - v3
+- php - 8.3.28
+- laravel/fortify (FORTIFY) - v1.37.2
+- laravel/framework (LARAVEL) - v13.16.1
+- laravel/prompts (PROMPTS) - v0.3.18
+- livewire/livewire (LIVEWIRE) - v4.3.1
+- laravel/boost (BOOST) - v2.4.10
+- laravel/breeze (BREEZE) - v2.4.2
+- laravel/mcp (MCP) - v0.8.1
+- laravel/pail (PAIL) - v1.2.7
+- laravel/pint (PINT) - v1.29.3
+- phpunit/phpunit (PHPUNIT) - v12.5.30
+- alpinejs (ALPINEJS) - v3.15.12
+- tailwindcss (TAILWINDCSS) - v3.4.19
 
 ## Skills Activation
 
@@ -122,6 +122,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - Run Artisan commands directly via the command line (e.g., `php artisan route:list`). Use `php artisan list` to discover available commands and `php artisan [command] --help` to check parameters.
 - Inspect routes with `php artisan route:list`. Filter with: `--method=GET`, `--name=users`, `--path=api`, `--except-vendor`, `--only-vendor`.
 - Read configuration values using dot notation: `php artisan config:show app.name`, `php artisan config:show database.default`. Or read config files directly from the `config/` directory.
+- After modifying routes, config files, or Blade views, clear and rebuild the application cache by running `php artisan optimize:clear && php artisan optimize`
 
 ## Tinker
 
@@ -151,7 +152,7 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 # Laravel Herd
 
 - The application is served by Laravel Herd at `https?://[kebab-case-project-dir].test`. Use the `get-absolute-url` tool to generate valid URLs. Never run commands to serve the site. It is always available.
-- Use the `herd` CLI to manage services, PHP versions, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`). Run `herd list` to discover all available commands.
+- Use the `herd` CLI to manage services, PHP versions, execute PHP and Composer commands, and sites (e.g. `herd sites`, `herd services:start <service>`, `herd php:list`, `herd php artisan optimize`, `herd composer install`). Run `herd list` to discover all available commands.
 
 === tests rules ===
 
@@ -224,3 +225,5 @@ This project has domain-specific skills available in `**/skills/**`. You MUST ac
 - To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
 
 </laravel-boost-guidelines>
+
+- Follow the Laravel guidelines defined in `.agents/skills/laravel-best-practices`

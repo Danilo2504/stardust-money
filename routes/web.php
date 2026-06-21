@@ -17,12 +17,12 @@ Route::middleware('auth')->group(function () {
     Route::resource('categories', CategoryController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 
-    Route::resource('expenses', ExpenseController::class)
-        ->except(['create', 'edit']);
     Route::get('expenses/data', [ExpenseController::class, 'data'])
         ->name('expenses.data');
     Route::patch('expenses/{expense}/confirm', [ExpenseController::class, 'confirm'])
         ->name('expenses.confirm');
+    Route::resource('expenses', ExpenseController::class)
+        ->except(['create', 'edit']);
 });
 
 require __DIR__.'/auth.php';

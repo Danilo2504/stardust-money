@@ -10,7 +10,4 @@
     <a href="{{ route('expenses.index') }}" class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
         Gastos
     </a>
-    <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
-        Categorias
-    </a>
 </div>
