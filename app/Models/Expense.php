@@ -11,13 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection as SupportCollection;
 
 /**
  * App\Models\Expense
  *
  * @property string $id
  * @property string|null $user_id
- * @property int|null $code
+ * @property string|null $code
  * @property bool|null $draft
  * @property string|null $description
  * @property float|null $amount
@@ -49,7 +50,7 @@ class Expense extends BaseModel
         'amount',
         'category_id',
         'notes',
-        'type',
+        'type', // ['one_time', 'recurring_child', 'installment']
         'expense_date',
         'recurring_expense_id',
         'installment_group_id',
@@ -60,9 +61,17 @@ class Expense extends BaseModel
         'amount' => 'decimal:4',
         'expense_date' => 'datetime',
         'draft' => 'boolean',
-        'code' => 'integer',
         'installment_number' => 'integer',
     ];
+
+    public static function types(): SupportCollection
+    {
+        return collect([
+            (object) ['value' => 'one_time', 'name' => 'De una vez'],
+            (object) ['value' => 'recurring_child', 'name' => 'Recurrente'],
+            (object) ['value' => 'installment', 'name' => 'A cuotas'],
+        ]);
+    }
 
     public static function listAll(ExpenseFilter $filter): Collection
     {

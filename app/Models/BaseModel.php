@@ -5,13 +5,16 @@ namespace App\Models;
 use App\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
+// use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Schema;
 use LogicException;
 
 abstract class BaseModel extends Model
 {
-    use HasUuid;
+    use HasFactory, HasUuid, MassPrunable;
 
     protected $keyType = 'string';
 
@@ -54,6 +57,11 @@ abstract class BaseModel extends Model
     {
         $this->ensureColumnExists('draft');
 
-        $this->update(['draft' => true]);
+        $this->update(['draft' => false]);
+    }
+
+    public function prunable(): Builder
+    {
+        return static::onlyTrashed()->where('deleted_at', '<=', now()->subDays(30));
     }
 }
