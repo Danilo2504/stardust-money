@@ -1,6 +1,7 @@
 <?php
 
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use App\Models\Category;
 use App\Models\Expense;
@@ -21,6 +22,8 @@ new class extends Component
     public ?string $recurring_expense_id = null;
 
     public array $splits = [];
+    public bool $showSuccess = false;
+    public ?string $expenseId = null;
 
     public function mount(): void
     {
@@ -70,22 +73,45 @@ new class extends Component
             return;
         }
 
-        $expense = Expense::create([
-            'user_id'              => auth()->id(),
-            'code'                 => (new Expense)->generateCode(),
-            'description'          => $this->description,
-            'amount'               => $this->amount,
-            'category_id'          => $this->category_id,
-            'expense_date'         => $this->expense_date,
-            'notes'                => $this->notes,
-            'type'                 => $this->type,
-            'installment_group_id' => $this->installment_group_id,
-            'recurring_expense_id' => $this->recurring_expense_id,
-            'installment_number'   => $this->installment_number,
-            'draft'                => false,
-        ]);
+        if ($this->expenseId) {
+            $expense = Expense::findOrFail($this->expenseId);
+            $this->ensureOwned($expense);
+
+            $expense->update([
+                'description'          => $this->description,
+                'amount'               => $this->amount,
+                'category_id'          => $this->category_id,
+                'expense_date'         => $this->expense_date,
+                'notes'                => $this->notes,
+                'type'                 => $this->type,
+                'installment_group_id' => $this->installment_group_id,
+                'recurring_expense_id' => $this->recurring_expense_id,
+                'installment_number'   => $this->installment_number,
+            ]);
+
+            $expense->splits()->delete();
+        } else {
+            $expense = Expense::create([
+                'user_id'              => auth()->id(),
+                'code'                 => (new Expense)->generateCode(),
+                'description'          => $this->description,
+                'amount'               => $this->amount,
+                'category_id'          => $this->category_id,
+                'expense_date'         => $this->expense_date,
+                'notes'                => $this->notes,
+                'type'                 => $this->type,
+                'installment_group_id' => $this->installment_group_id,
+                'recurring_expense_id' => $this->recurring_expense_id,
+                'installment_number'   => $this->installment_number,
+                'draft'                => false,
+            ]);
+        }
 
         foreach ($this->splits as $split) {
+            if (blank($split['person_name']) && blank($split['amount'])) {
+                continue;
+            }
+
             $expense->splits()->create([
                 'person_name' => $split['person_name'],
                 'amount'      => $split['amount'],
@@ -94,10 +120,43 @@ new class extends Component
         }
 
         $this->resetForm();
-        $this->dispatch('expense-created');
+        $this->showSuccess = true;
+        $this->dispatch('expense-saved');
+
+        $this->js("setTimeout(() => { \$wire.set('showSuccess', false) }, 2500)");
     }
 
-    private function resetForm(): void
+    #[On('edit-expense')]
+    public function edit(string $id): void
+    {
+        $expense = Expense::with('splits')->findOrFail($id);
+        $this->ensureOwned($expense);
+
+        $this->expenseId = $expense->id;
+        $this->description = $expense->description;
+        $this->amount = (string) $expense->amount;
+        $this->category_id = $expense->category_id;
+        $this->expense_date = $expense->expense_date?->format('Y-m-d') ?? now()->format('Y-m-d');
+        $this->notes = $expense->notes ?? '';
+        $this->type = $expense->type;
+        $this->installment_group_id = $expense->installment_group_id;
+        $this->installment_number = $expense->installment_number;
+        $this->recurring_expense_id = $expense->recurring_expense_id;
+        $this->splits = $expense->splits->map(fn ($split) => [
+            'person_name' => $split->person_name,
+            'amount'      => $split->amount,
+        ])->toArray();
+    }
+
+    private function ensureOwned(Expense $expense): void
+    {
+        if ($expense->user_id !== auth()->id()) {
+            abort(403, 'No puedes gestionar este gasto.');
+        }
+    }
+
+    #[On('reset-expense-form')]
+    public function resetForm(): void
     {
         $this->reset([
             'description',
@@ -109,9 +168,11 @@ new class extends Component
             'installment_number',
             'recurring_expense_id',
             'splits',
+            'expenseId',
         ]);
         $this->type = 'one_time';
         $this->expense_date = now()->format('Y-m-d');
+        $this->resetValidation();
     }
 
     #[Computed]
@@ -121,6 +182,7 @@ new class extends Component
     }
 
     #[Computed]
+    #[On('categories-updated')]
     public function categories()
     {
         return Category::where('user_id', auth()->id())
@@ -145,117 +207,173 @@ new class extends Component
 };
 ?>
 
-<form wire:submit="save"
-    x-data="{ type: @js($type) }">
-    <!-- Descripción -->
-    <div class="mb-3">
-        <label class="form-label">Descripción</label>
-        <input type="text" wire:model="description" class="form-control @error('description') is-invalid @enderror" name="description" placeholder="Ej: Compra supermercado" required>
-        @error('description')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
+<form wire:submit="save" x-data="{ type: @js($type) }">
+    @if($showSuccess)
+        <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div>{{ $expenseId ? 'Gasto actualizado correctamente.' : 'Gasto guardado correctamente.' }}</div>
+        </div>
+    @endif
 
-    <div class="row">
-        <!-- Monto -->
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Monto (€)</label>
-            <div class="input-group">
-                <span class="input-group-text">€</span>
-                <input type="number" wire:model="amount" step="0.01"  class="form-control @error('amount') is-invalid @enderror" name="amount" placeholder="0.00" required>
+    <div class="form-section mb-3">
+        <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Información general</h6>
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label" for="description">Descripción</label>
+                <input type="text"
+                       id="description"
+                       wire:model="description"
+                       class="form-control @error('description') is-invalid @enderror"
+                       placeholder="Ej: Compra supermercado"
+                       required>
+                @error('description')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="amount">Monto (€)</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                    <input type="number"
+                           id="amount"
+                           wire:model="amount"
+                           step="0.01"
+                           min="0.01"
+                           max="9999.9999"
+                           class="form-control @error('amount') is-invalid @enderror"
+                           placeholder="0,00"
+                           required>
+                </div>
                 @error('amount')
+                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="expense_date">Fecha</label>
+                <input type="date"
+                       id="expense_date"
+                       wire:model="expense_date"
+                       class="form-control @error('expense_date') is-invalid @enderror"
+                       required>
+                @error('expense_date')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
         </div>
+    </div>
 
-        <!-- Fecha -->
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Fecha</label>
-            <input type="text" wire:model="expense_date" value="{{$expense_date}}" class="form-control datepicker @error('expense_date') is-invalid @enderror" name="expense_date" placeholder="Selecciona fecha" required>
-            @error('expense_date')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+    <div class="form-section mb-3">
+        <h6 class="form-section-title"><i class="bi bi-tags me-2"></i>Clasificación</h6>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label" for="type">Tipo de gasto</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-collection"></i></span>
+                    <select id="type"
+                            wire:model="type"
+                            x-model="type"
+                            class="form-select @error('type') is-invalid @enderror"
+                            required>
+                        @foreach($this->types as $type)
+                            <option value="{{ $type->value }}">{{ $type->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('type')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label" for="category_id">Categoría</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-folder"></i></span>
+                    <select id="category_id"
+                            wire:model="category_id"
+                            class="form-select @error('category_id') is-invalid @enderror">
+                        <option value="">Seleccionar...</option>
+                        @foreach($this->categories as $category)
+                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('category_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Type -->
-        <div class="col-md-12 mb-3">
-            <label class="form-label">Tipo de gasto</label>
-            <select class="form-select @error('type') is-invalid @enderror" name="type" wire:model="type" x-model="type">
-                @foreach($this->types as $type)
-                    <option value="{{ $type->value }}">{{ $type->name }}</option>
-                @endforeach
-            </select>
-            @error('type')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+    <div class="form-section mb-3"
+         x-show="type === 'recurring_child'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         style="display: none;">
+        <h6 class="form-section-title"><i class="bi bi-arrow-repeat me-2"></i>Recurrencia</h6>
+        <div class="row g-3">
+            <div class="col-12">
+                <label class="form-label" for="recurring_expense_id">Gasto recurrente</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
+                    <select id="recurring_expense_id"
+                            wire:model="recurring_expense_id"
+                            class="form-select @error('recurring_expense_id') is-invalid @enderror">
+                        <option value="">Ninguno</option>
+                        @foreach($this->recurringExpenses as $recurringExpense)
+                            <option value="{{ $recurringExpense->id }}">{{ $recurringExpense->description }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                @error('recurring_expense_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Categoría -->
-        <div class="col-md-12 mb-3">
-            <label class="form-label">Categoría</label>
-            <select class="form-select @error('category_id') is-invalid @enderror" name="category_id" wire:model="category_id">
-                <option value="">Seleccionar...</option>
-                @foreach($this->categories as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                @endforeach
-            </select>
-            @error('category_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    </div>
-
-    <div x-show="type === 'recurring_child'"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 -translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-2">
-        <!-- Gasto recurrente -->
-        <div class="col-md-12 mb-3">
-            <label class="form-label">Gasto recurrente</label>
-            <select class="form-select @error('recurring_expense_id') is-invalid @enderror" name="recurring_expense_id" wire:model="recurring_expense_id">
-                <option value="">Ninguno</option>
-                @foreach($this->recurringExpenses as $recurringExpense)
-                    <option value="{{ $recurringExpense->id }}">{{ $recurringExpense->description }}</option>
-                @endforeach
-            </select>
-            @error('recurring_expense_id')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    </div>
-
-    <div x-show="type === 'installment'"
-        x-transition:enter="transition ease-out duration-300"
-        x-transition:enter-start="opacity-0 -translate-y-2"
-        x-transition:enter-end="opacity-100 translate-y-0"
-        x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100 translate-y-0"
-        x-transition:leave-end="opacity-0 -translate-y-2">
-        <div class="row">
-            <!-- Grupo de cuotas -->
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Grupo de cuotas</label>
-                <select class="form-select @error('installment_group_id') is-invalid @enderror" name="installment_group_id" wire:model="installment_group_id">
-                    <option value="">Ninguno</option>
-                    @foreach($this->installmentGroups as $group)
-                        <option value="{{ $group->id }}">{{ $group->description }}</option>
-                    @endforeach
-                </select>
+    <div class="form-section mb-3"
+         x-show="type === 'installment'"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-1"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-1"
+         style="display: none;">
+        <h6 class="form-section-title"><i class="bi bi-layers me-2"></i>Cuotas</h6>
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label" for="installment_group_id">Grupo de cuotas</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-folder-symlink"></i></span>
+                    <select id="installment_group_id"
+                            wire:model="installment_group_id"
+                            class="form-select @error('installment_group_id') is-invalid @enderror">
+                        <option value="">Ninguno</option>
+                        @foreach($this->installmentGroups as $group)
+                            <option value="{{ $group->id }}">{{ $group->description }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 @error('installment_group_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Número de cuota</label>
-                <input type="number" name="installment_number" step="1" min="1" wire:model="installment_number" class="form-control @error('installment_number') is-invalid @enderror">
+            <div class="col-md-4">
+                <label class="form-label" for="installment_number">Número de cuota</label>
+                <input type="number"
+                       id="installment_number"
+                       wire:model="installment_number"
+                       step="1"
+                       min="1"
+                       class="form-control @error('installment_number') is-invalid @enderror"
+                       placeholder="Ej: 3">
                 @error('installment_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -263,87 +381,85 @@ new class extends Component
         </div>
     </div>
 
-    <div class="row">
-        <!-- Splits -->
-        <div class="col-md-12 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <label class="form-label mb-0">Gasto compartido &bullet; <span class="mt-2 small text-muted">Total asignado: {{ collect($splits)->sum('amount') }} €</span></label>
-                <button type="button" wire:click="addSplit" class="btn btn-sm btn-outline-primary">
-                    + Añadir persona
-                </button>
-            </div>
-            @error('splits')
-                <div class="alert alert-danger py-1 px-2 small mb-2">{{ $message }}</div>
-            @enderror
-            <div class="list-group">
-                @foreach($splits as $index => $split)
-                    <div class="list-group-item mb-2 rounded shadow-sm"
-                        wire:key="split-{{ $index }}"
-                        x-data
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 translate-y-2"
-                        x-transition:enter-end="opacity-100 translate-y-0"
-                        x-transition:leave="transition ease-in duration-200"
-                        x-transition:leave-start="opacity-100 translate-y-0"
-                        x-transition:leave-end="opacity-0 translate-y-2">
+    <div class="form-section mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="form-section-title mb-0"><i class="bi bi-people me-2"></i>Gasto compartido</h6>
+            <button type="button" wire:click="addSplit" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-plus-lg me-1"></i> Añadir persona
+            </button>
+        </div>
 
-                        <div class="row align-items-end">
-                            <!-- Nombre -->
-                            <div class="col-md-5">
-                                <label class="form-label">Persona</label>
+        @error('splits')
+            <div class="alert alert-danger py-2 small mb-2">{{ $message }}</div>
+        @enderror
+
+        <div class="d-flex align-items-center gap-2 small text-muted mb-2">
+            <i class="bi bi-pie-chart"></i>
+            <span>Total asignado:</span>
+            <span class="fw-semibold">€{{ number_format(collect($splits)->sum('amount'), 2, ',', '.') }}</span>
+            <span>/</span>
+            <span>€{{ number_format((float) $amount, 2, ',', '.') }}</span>
+        </div>
+
+        <div class="d-flex flex-column gap-2">
+            @foreach($splits as $index => $split)
+                <div class="card-custom p-2"
+                     wire:key="split-{{ $index }}">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label small">Persona</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="bi bi-person"></i></span>
                                 <input type="text"
-                                    class="form-control"
-                                    wire:model="splits.{{ $index }}.person_name"
-                                    placeholder="Ej: Juan">
-                            </div>
-
-                            <!-- Monto -->
-                            <div class="col-md-5">
-                                <label class="form-label">Parte correspondiente (€)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">€</span>
-                                    <input type="number"
-                                        step="0.01"
-                                        class="form-control"
-                                        wire:model.live="splits.{{ $index }}.amount"
-                                        placeholder="0.00">
-                                </div>
-                            </div>
-
-                            <!-- Eliminar -->
-                            <div class="col-md-2 text-end">
-                                <button type="button"
-                                        wire:click="removeSplit({{ $index }})"
-                                        class="btn btn-outline-danger w-100">
-                                    ✕
-                                </button>
+                                       class="form-control"
+                                       wire:model="splits.{{ $index }}.person_name"
+                                       placeholder="Ej: Juan">
                             </div>
                         </div>
-
+                        <div class="col-md-5">
+                            <label class="form-label small">Parte (€)</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">€</span>
+                                <input type="number"
+                                       step="0.01"
+                                       class="form-control"
+                                       wire:model.live="splits.{{ $index }}.amount"
+                                       placeholder="0,00">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button"
+                                    wire:click="removeSplit({{ $index }})"
+                                    class="btn btn-sm btn-outline-danger w-100">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                @endforeach
-            </div>
+                </div>
+            @endforeach
         </div>
     </div>
 
-    <!-- Notas -->
-    <div class="mb-3">
-        <label class="form-label">Notas</label>
-        <textarea class="form-control @error('notes') is-invalid @enderror" name="notes" wire:model="notes" rows="2" placeholder="Opcional..."></textarea>
+    <div class="form-section mb-3">
+        <h6 class="form-section-title"><i class="bi bi-sticky me-2"></i>Notas</h6>
+        <textarea id="notes"
+                  wire:model="notes"
+                  class="form-control @error('notes') is-invalid @enderror"
+                  rows="2"
+                  placeholder="Opcional..."></textarea>
         @error('notes')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 
-    <!-- Botones -->
-    <div class="d-flex justify-content-end">
-        <button type="reset" class="btn btn-outline-secondary me-2">Cancelar</button>
-        <button type="submit" class="btn btn-primary">
-            Guardar Gasto
-            <div wire:loading>
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-            </div>
+    <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Cancelar
+        </button>
+        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
+            <i class="bi bi-check-lg me-1"></i>
+            <span>{{ $expenseId ? 'Guardar cambios' : 'Guardar gasto' }}</span>
+            <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>
     </div>
-
 </form>

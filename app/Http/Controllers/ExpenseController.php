@@ -29,16 +29,16 @@ class ExpenseController extends Controller
                 ? $expense->expense_date->format('d/m/Y')
                 : '—')
             ->editColumn('draft', fn ($expense) => $expense->draft
-                ? '<span class="badge bg-warning text-dark">Borrador</span>'
-                : '<span class="badge bg-success">Confirmado</span>')
+                ? '<span class="badge rounded-pill badge-soft-warning">Borrador</span>'
+                : '<span class="badge rounded-pill badge-soft-success">Confirmado</span>')
             ->editColumn('type', fn ($expense) => match ($expense->type) {
-                'one_time' => 'Único',
-                'recurring_child' => 'Recurrente',
-                'installment' => 'Cuota',
+                'one_time' => '<span class="badge rounded-pill badge-soft-info">Único</span>',
+                'recurring_child' => '<span class="badge rounded-pill badge-soft-secondary">Recurrente</span>',
+                'installment' => '<span class="badge rounded-pill badge-soft-secondary">Cuota</span>',
                 default => '—',
             })
             ->addColumn('actions', fn ($expense) => view('components.expenses.actions', compact('expense'))->render())
-            ->rawColumns(['draft', 'actions'])
+            ->rawColumns(['draft', 'type', 'actions'])
             ->toJson();
     }
 

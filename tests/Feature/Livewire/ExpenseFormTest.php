@@ -22,7 +22,7 @@ class ExpenseFormTest extends TestCase
             ->assertSet('category_id', null)
             ->assertSet('type', 'one_time')
             ->assertSet('expense_date', now()->format('Y-m-d'))
-            ->assertSee('Guardar Gasto', false);
+            ->assertSee('Guardar gasto', false);
 
         $this->assertDatabaseMissing('expenses', [
             'user_id' => $user->id,
@@ -61,7 +61,7 @@ class ExpenseFormTest extends TestCase
             ->set('notes', 'Restaurante italiano')
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDispatched('expense-created');
+            ->assertDispatched('expense-saved');
 
         $expense = Expense::where('user_id', $user->id)
             ->where('description', 'Cena con amigos')
@@ -240,5 +240,80 @@ class ExpenseFormTest extends TestCase
 
         $this->assertNotEmpty($expense->code);
         $this->assertSame(8, strlen((string) $expense->code));
+    }
+
+    public function test_expense_can_be_updated(): void
+    {
+        $user = $this->track(User::factory()->create());
+        $category = $this->track(Category::factory()->for($user)->create());
+        $expense = $this->track(Expense::factory()->for($user)->create([
+            'description' => 'Gasto original',
+            'amount' => 10,
+            'type' => 'one_time',
+        ]));
+
+        $this->actingAs($user);
+
+        Livewire::test('expenses.expense-form')
+            ->call('edit', $expense->id)
+            ->assertSet('expenseId', $expense->id)
+            ->assertSet('description', 'Gasto original')
+            ->set('description', 'Gasto actualizado')
+            ->set('amount', '25.50')
+            ->set('category_id', $category->id)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('expense-saved');
+
+        $this->assertDatabaseHas('expenses', [
+            'id' => $expense->id,
+            'user_id' => $user->id,
+            'description' => 'Gasto actualizado',
+            'amount' => '25.5000',
+            'category_id' => $category->id,
+        ]);
+    }
+
+    public function test_user_cannot_edit_another_users_expense(): void
+    {
+        $user = $this->track(User::factory()->create());
+        $otherUser = $this->track(User::factory()->create());
+        $expense = $this->track(Expense::factory()->for($otherUser)->create());
+
+        $this->actingAs($user);
+
+        Livewire::test('expenses.expense-form')
+            ->call('edit', $expense->id)
+            ->assertForbidden();
+    }
+
+    public function test_splits_are_replaced_when_updating_expense(): void
+    {
+        $user = $this->track(User::factory()->create());
+        $expense = $this->track(Expense::factory()->for($user)->create());
+        $oldSplit = $this->track($expense->splits()->create([
+            'user_id' => $user->id,
+            'person_name' => 'Pedro',
+            'amount' => 5,
+        ]));
+
+        $this->actingAs($user);
+
+        Livewire::test('expenses.expense-form')
+            ->call('edit', $expense->id)
+            ->set('splits', [
+                ['person_name' => 'Ana', 'amount' => 7],
+            ])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertSoftDeleted('expense_splits', [
+            'id' => $oldSplit->id,
+        ]);
+        $this->assertDatabaseHas('expense_splits', [
+            'expense_id' => $expense->id,
+            'person_name' => 'Ana',
+            'amount' => '7.0000',
+        ]);
     }
 }

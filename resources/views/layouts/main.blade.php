@@ -1,12 +1,11 @@
 @extends('app')
 
 @section('body')
-    <div class="min-h-screen flex flex-col">
-
+    <div class="app-wrapper">
         @include('components.layout.header')
         @include('components.layout.side')
 
-        <main class="flex-1">
+        <main class="main-content">
             @yield('content')
         </main>
 
