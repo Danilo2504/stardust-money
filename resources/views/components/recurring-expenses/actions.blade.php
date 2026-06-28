@@ -2,11 +2,11 @@
     <button class="btn btn-sm btn-outline-primary edit-recurring-expense"
             data-id="{{ $recurring->id }}"
             title="Editar">
-        <i class="bi bi-pencil"></i>
+        <i class="fas fa-edit"></i>
     </button>
     <button class="btn btn-sm btn-outline-danger delete-recurring-expense"
             data-id="{{ $recurring->id }}"
             title="Eliminar">
-        <i class="bi bi-trash"></i>
+        <i class="fas fa-trash-alt"></i>
     </button>
 </div>

@@ -18,6 +18,8 @@ $(document).ready(function() {
         order: [[1, 'asc']]
     });
 
+    sbDatatableProcessing(table);
+
     window.addEventListener('category-saved', function () {
         table.draw(false);
     });

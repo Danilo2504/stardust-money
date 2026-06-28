@@ -120,7 +120,7 @@ new class extends Component
 
 <form wire:submit="save">
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Información general</h6>
+        <h6 class="form-section-title"><i class="fas fa-file-alt me-2"></i>Información general</h6>
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label" for="recurring-description">Descripción</label>
@@ -138,7 +138,7 @@ new class extends Component
             <div class="col-md-6">
                 <label class="form-label" for="recurring-amount">Monto referencial (€)</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                    <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
                     <input type="number"
                            id="recurring-amount"
                            wire:model="amount"
@@ -156,7 +156,7 @@ new class extends Component
             <div class="col-md-6">
                 <label class="form-label" for="recurring-category">Categoría</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-folder"></i></span>
+                    <span class="input-group-text"><i class="fas fa-folder"></i></span>
                     <select id="recurring-category"
                             wire:model="category_id"
                             class="form-select @error('category_id') is-invalid @enderror">
@@ -174,7 +174,7 @@ new class extends Component
     </div>
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-clock-history me-2"></i>Frecuencia</h6>
+        <h6 class="form-section-title"><i class="fas fa-clock me-2"></i>Frecuencia</h6>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label" for="recurring-interval-value">Cada</label>
@@ -208,7 +208,7 @@ new class extends Component
     </div>
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-calendar-event me-2"></i>Programación</h6>
+        <h6 class="form-section-title"><i class="fas fa-calendar-alt me-2"></i>Programación</h6>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label" for="recurring-next-due">Próxima fecha</label>
@@ -237,8 +237,8 @@ new class extends Component
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cancelar
         </button>
-        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
-            <i class="bi bi-check-lg me-1"></i>
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+            <i class="fas fa-check me-1"></i>
             <span>{{ $recurringExpenseId ? 'Guardar cambios' : 'Crear plantilla' }}</span>
             <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>

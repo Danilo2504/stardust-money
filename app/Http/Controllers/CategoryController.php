@@ -26,13 +26,13 @@ class CategoryController extends Controller
             ->orderBy('name');
 
         return DataTables::eloquent($query)
-            ->editColumn('is_default', fn (Category $category) => $category->is_default
-                ? '<span class="badge rounded-pill badge-soft-secondary">Default</span>'
-                : '<span class="badge rounded-pill badge-soft-info">Personalizada</span>')
-            ->editColumn('color', fn (Category $category) => $category->color
-                ? '<span class="d-inline-block rounded-circle me-2" style="width:12px;height:12px;background:'.$category->color.';"></span>'.$category->color
+            ->editColumn('is_default', fn(Category $category) => $category->is_default
+                ? '<span class="badge rounded-pill badge-secondary">Default</span>'
+                : '<span class="badge rounded-pill badge-info">Personalizada</span>')
+            ->editColumn('color', fn(Category $category) => $category->color
+                ? '<span class="d-inline-block rounded-circle me-2" style="width:12px;height:12px;background:' . $category->color . ';"></span>' . $category->color
                 : '—')
-            ->addColumn('actions', fn (Category $category) => view('components.categories.actions', compact('category'))->render())
+            ->addColumn('actions', fn(Category $category) => view('components.categories.actions', compact('category'))->render())
             ->rawColumns(['is_default', 'color', 'actions'])
             ->toJson();
     }

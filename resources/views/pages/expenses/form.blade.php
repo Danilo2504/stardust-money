@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="expenseModalLabel">
-                    <i class="bi bi-plus-circle me-2 text-primary"></i>
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>
                     <span id="expenseModalTitle">Registrar gasto</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

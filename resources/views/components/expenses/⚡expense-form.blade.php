@@ -93,7 +93,7 @@ new class extends Component
         } else {
             $expense = Expense::create([
                 'user_id'              => auth()->id(),
-                'code'                 => (new Expense)->generateCode(),
+                'code'                 => Expense::generateCode(auth()->id()),
                 'description'          => $this->description,
                 'amount'               => $this->amount,
                 'category_id'          => $this->category_id,
@@ -210,13 +210,13 @@ new class extends Component
 <form wire:submit="save" x-data="{ type: @js($type) }">
     @if($showSuccess)
         <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i>
+            <i class="fas fa-check-circle me-2"></i>
             <div>{{ $expenseId ? 'Gasto actualizado correctamente.' : 'Gasto guardado correctamente.' }}</div>
         </div>
     @endif
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Información general</h6>
+        <h6 class="form-section-title"><i class="fas fa-file-alt me-2"></i>Información general</h6>
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label" for="description">Descripción</label>
@@ -234,7 +234,7 @@ new class extends Component
             <div class="col-md-6">
                 <label class="form-label" for="amount">Monto (€)</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                    <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
                     <input type="number"
                            id="amount"
                            wire:model="amount"
@@ -265,12 +265,12 @@ new class extends Component
     </div>
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-tags me-2"></i>Clasificación</h6>
+        <h6 class="form-section-title"><i class="fas fa-tags me-2"></i>Clasificación</h6>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label" for="type">Tipo de gasto</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-collection"></i></span>
+                    <span class="input-group-text"><i class="fas fa-th-large"></i></span>
                     <select id="type"
                             wire:model="type"
                             x-model="type"
@@ -289,7 +289,7 @@ new class extends Component
             <div class="col-md-6">
                 <label class="form-label" for="category_id">Categoría</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-folder"></i></span>
+                    <span class="input-group-text"><i class="fas fa-folder"></i></span>
                     <select id="category_id"
                             wire:model="category_id"
                             class="form-select @error('category_id') is-invalid @enderror">
@@ -315,12 +315,12 @@ new class extends Component
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-1"
          style="display: none;">
-        <h6 class="form-section-title"><i class="bi bi-arrow-repeat me-2"></i>Recurrencia</h6>
+        <h6 class="form-section-title"><i class="fas fa-sync-alt me-2"></i>Recurrencia</h6>
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label" for="recurring_expense_id">Gasto recurrente</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-calendar-week"></i></span>
+                    <span class="input-group-text"><i class="fas fa-calendar-week"></i></span>
                     <select id="recurring_expense_id"
                             wire:model="recurring_expense_id"
                             class="form-select @error('recurring_expense_id') is-invalid @enderror">
@@ -346,12 +346,12 @@ new class extends Component
          x-transition:leave-start="opacity-100 translate-y-0"
          x-transition:leave-end="opacity-0 -translate-y-1"
          style="display: none;">
-        <h6 class="form-section-title"><i class="bi bi-layers me-2"></i>Cuotas</h6>
+        <h6 class="form-section-title"><i class="fas fa-layer-group me-2"></i>Cuotas</h6>
         <div class="row g-3">
             <div class="col-md-8">
                 <label class="form-label" for="installment_group_id">Grupo de cuotas</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-folder-symlink"></i></span>
+                    <span class="input-group-text"><i class="fas fa-folder-symlink"></i></span>
                     <select id="installment_group_id"
                             wire:model="installment_group_id"
                             class="form-select @error('installment_group_id') is-invalid @enderror">
@@ -383,9 +383,9 @@ new class extends Component
 
     <div class="form-section mb-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
-            <h6 class="form-section-title mb-0"><i class="bi bi-people me-2"></i>Gasto compartido</h6>
+            <h6 class="form-section-title mb-0"><i class="fas fa-users me-2"></i>Gasto compartido</h6>
             <button type="button" wire:click="addSplit" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-plus-lg me-1"></i> Añadir persona
+                <i class="fas fa-plus me-1"></i> Añadir persona
             </button>
         </div>
 
@@ -394,7 +394,7 @@ new class extends Component
         @enderror
 
         <div class="d-flex align-items-center gap-2 small text-muted mb-2">
-            <i class="bi bi-pie-chart"></i>
+            <i class="fas fa-chart-pie"></i>
             <span>Total asignado:</span>
             <span class="fw-semibold">€{{ number_format(collect($splits)->sum('amount'), 2, ',', '.') }}</span>
             <span>/</span>
@@ -409,7 +409,7 @@ new class extends Component
                         <div class="col-md-5">
                             <label class="form-label small">Persona</label>
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
                                 <input type="text"
                                        class="form-control"
                                        wire:model="splits.{{ $index }}.person_name"
@@ -431,7 +431,7 @@ new class extends Component
                             <button type="button"
                                     wire:click="removeSplit({{ $index }})"
                                     class="btn btn-sm btn-outline-danger w-100">
-                                <i class="bi bi-trash"></i>
+                                <i class="fas fa-trash-alt"></i>
                             </button>
                         </div>
                     </div>
@@ -441,7 +441,7 @@ new class extends Component
     </div>
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-sticky me-2"></i>Notas</h6>
+        <h6 class="form-section-title"><i class="fas fa-sticky-note me-2"></i>Notas</h6>
         <textarea id="notes"
                   wire:model="notes"
                   class="form-control @error('notes') is-invalid @enderror"
@@ -456,8 +456,8 @@ new class extends Component
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cancelar
         </button>
-        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
-            <i class="bi bi-check-lg me-1"></i>
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+            <i class="fas fa-check me-1"></i>
             <span>{{ $expenseId ? 'Guardar cambios' : 'Guardar gasto' }}</span>
             <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>

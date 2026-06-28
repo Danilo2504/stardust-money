@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="sharedReportModalLabel">
-                    <i class="bi bi-link-45deg me-2 text-primary"></i>
+                    <i class="fas fa-link me-2 text-primary"></i>
                     <span id="sharedReportModalTitle">Nuevo reporte compartido</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

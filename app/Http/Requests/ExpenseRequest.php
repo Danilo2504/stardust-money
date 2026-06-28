@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ExpenseRequest extends FormRequest
 {
@@ -24,13 +25,19 @@ class ExpenseRequest extends FormRequest
     {
         return [
             'description' => 'required',
-            'code' => 'required|unique:expenses,code,'.$this->route('expense'),
+            'code' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('expenses', 'code')
+                    ->where(fn ($query) => $query->where('user_id', $this->user()?->id))
+                    ->ignore($this->route('expense')),
+            ],
             'amount' => 'required|numeric|gt:0',
             'category_id' => 'nullable|exists:categories,id',
             'expense_date' => 'required|date',
             'type' => 'required|in:one_time,recurring_child,installment',
             'notes' => 'nullable',
-            'draft' => 'boolean',
             'recurring_expense_id' => 'required_if:type,recurring_child',
             'installment_group_id' => 'required_if:type,installment',
             'installment_number' => 'required_if:type,installment',

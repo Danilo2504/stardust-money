@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -32,14 +31,12 @@ class CategoriesTableSeeder extends Seeder
             ['name' => 'Varios', 'color' => '#8033FF'],
         ];
 
-        $author = User::whereEmail('danilobautista2004@gmail.com')->first();
-
         foreach ($categories as $category) {
             Category::updateOrCreate(
-                ['name' => $category['name']],
+                ['name' => $category['name'], 'is_default' => true],
                 [
                     'is_default' => true,
-                    'user_id' => $author->id ?? null,
+                    'user_id' => null,
                     'color' => $category['color'],
                 ]
             );

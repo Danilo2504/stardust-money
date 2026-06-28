@@ -3,19 +3,19 @@
         <button class="btn btn-sm btn-success confirm-draft"
                 data-id="{{ $expense->id }}"
                 title="Confirmar">
-            <i class="bi bi-check-lg"></i>
+            <i class="fas fa-check"></i>
         </button>
     @endif
 
     <button class="btn btn-sm btn-outline-primary edit-expense"
             data-id="{{ $expense->id }}"
             title="Editar">
-        <i class="bi bi-pencil"></i>
+        <i class="fas fa-edit"></i>
     </button>
 
     <button class="btn btn-sm btn-outline-danger delete-expense"
             data-id="{{ $expense->id }}"
             title="Eliminar">
-        <i class="bi bi-trash"></i>
+        <i class="fas fa-trash-alt"></i>
     </button>
 </div>

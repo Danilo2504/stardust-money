@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Expense;
 use App\Models\SharedReport;
 use App\Models\User;
@@ -54,7 +55,7 @@ class SharedReportTest extends TestCase
 
         $response->assertOk()
             ->assertSee('Gasto compartido')
-            ->assertSee('Reporte compartido de gastos');
+            ->assertSee('Gastos del reporte');
     }
 
     public function test_expired_shared_report_returns_not_found(): void
@@ -67,5 +68,53 @@ class SharedReportTest extends TestCase
         $response = $this->get(route('shared-reports.public', $report->token));
 
         $response->assertNotFound();
+    }
+
+    public function test_user_can_export_shared_report_csv(): void
+    {
+        $user = $this->track(User::factory()->create());
+        $category = $this->track(Category::factory()->create([
+            'user_id' => $user->id,
+        ]));
+        $includedExpense = $this->track(Expense::factory()->for($user)->create([
+            'description' => 'Gasto incluido',
+            'type' => 'one_time',
+            'category_id' => $category->id,
+        ]));
+        $this->track(Expense::factory()->for($user)->create([
+            'description' => 'Gasto excluido',
+            'type' => 'installment',
+            'category_id' => $category->id,
+        ]));
+        $report = $this->track(SharedReport::factory()->for($user)->create([
+            'filters' => ['type' => 'one_time'],
+        ]));
+
+        $response = $this->actingAs($user)
+            ->get(route('shared-reports.export', $report));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'text/csv; charset=UTF-8')
+            ->assertHeader('Content-Disposition', 'attachment; filename=reporte.csv');
+
+        ob_start();
+        $response->baseResponse->sendContent();
+        $csv = ob_get_clean();
+
+        $this->assertStringContainsString('Gasto incluido', $csv);
+        $this->assertStringNotContainsString('Gasto excluido', $csv);
+        $this->assertStringContainsString($category->name, $csv);
+    }
+
+    public function test_user_cannot_export_foreign_shared_report_csv(): void
+    {
+        $owner = $this->track(User::factory()->create());
+        $other = $this->track(User::factory()->create());
+        $report = $this->track(SharedReport::factory()->for($owner)->create());
+
+        $response = $this->actingAs($other)
+            ->get(route('shared-reports.export', $report));
+
+        $response->assertForbidden();
     }
 }

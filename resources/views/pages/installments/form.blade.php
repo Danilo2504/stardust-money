@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="installmentGroupModalLabel">
-                    <i class="bi bi-layers me-2 text-primary"></i>
+                    <i class="fas fa-layer-group me-2 text-primary"></i>
                     <span id="installmentGroupModalTitle">Nuevo grupo de cuotas</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

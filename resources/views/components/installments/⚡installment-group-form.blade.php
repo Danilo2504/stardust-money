@@ -81,7 +81,7 @@ new class extends Component
 
 <form wire:submit="save">
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Información general</h6>
+        <h6 class="form-section-title"><i class="fas fa-file-alt me-2"></i>Información general</h6>
         <div class="row g-3">
             <div class="col-12">
                 <label class="form-label" for="installment-description">Descripción</label>
@@ -99,7 +99,7 @@ new class extends Component
             <div class="col-md-6">
                 <label class="form-label" for="installment-total">Monto total (€)</label>
                 <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-currency-euro"></i></span>
+                    <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
                     <input type="number"
                            id="installment-total"
                            wire:model="total_amount"
@@ -134,8 +134,8 @@ new class extends Component
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cancelar
         </button>
-        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
-            <i class="bi bi-check-lg me-1"></i>
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+            <i class="fas fa-check me-1"></i>
             <span>{{ $installmentGroupId ? 'Guardar cambios' : 'Crear grupo' }}</span>
             <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>

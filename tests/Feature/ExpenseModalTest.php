@@ -56,7 +56,7 @@ class ExpenseModalTest extends TestCase
 
         $expense = Expense::create([
             'user_id' => $user->id,
-            'code' => (new Expense)->generateCode(),
+            'code' => Expense::generateCode($user->id),
             'description' => 'Compra',
             'amount' => 25.50,
             'category_id' => $category->id,

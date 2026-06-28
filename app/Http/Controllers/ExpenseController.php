@@ -24,20 +24,20 @@ class ExpenseController extends Controller
         );
 
         return DataTables::eloquent($query)
-            ->editColumn('amount', fn ($expense) => number_format((float) $expense->amount, 2, ',', '.'))
-            ->editColumn('expense_date', fn ($expense) => $expense->expense_date
+            ->editColumn('amount', fn($expense) => number_format((float) $expense->amount, 2, ',', '.'))
+            ->editColumn('expense_date', fn($expense) => $expense->expense_date
                 ? $expense->expense_date->format('d/m/Y')
                 : '—')
-            ->editColumn('draft', fn ($expense) => $expense->draft
-                ? '<span class="badge rounded-pill badge-soft-warning">Borrador</span>'
-                : '<span class="badge rounded-pill badge-soft-success">Confirmado</span>')
-            ->editColumn('type', fn ($expense) => match ($expense->type) {
-                'one_time' => '<span class="badge rounded-pill badge-soft-info">Único</span>',
-                'recurring_child' => '<span class="badge rounded-pill badge-soft-secondary">Recurrente</span>',
-                'installment' => '<span class="badge rounded-pill badge-soft-secondary">Cuota</span>',
+            ->editColumn('draft', fn($expense) => $expense->draft
+                ? '<span class="badge rounded-pill badge-warning">Borrador</span>'
+                : '<span class="badge rounded-pill badge-success">Confirmado</span>')
+            ->editColumn('type', fn($expense) => match ($expense->type) {
+                'one_time' => '<span class="badge rounded-pill badge-info">Único</span>',
+                'recurring_child' => '<span class="badge rounded-pill badge-secondary">Recurrente</span>',
+                'installment' => '<span class="badge rounded-pill badge-secondary">Cuota</span>',
                 default => '—',
             })
-            ->addColumn('actions', fn ($expense) => view('components.expenses.actions', compact('expense'))->render())
+            ->addColumn('actions', fn($expense) => view('components.expenses.actions', compact('expense'))->render())
             ->rawColumns(['draft', 'type', 'actions'])
             ->toJson();
     }
@@ -47,6 +47,7 @@ class ExpenseController extends Controller
         $expense = Expense::create([
             ...$request->validated(),
             'user_id' => $request->user()->id,
+            'draft' => false,
         ]);
 
         return response()->json($expense, 201);

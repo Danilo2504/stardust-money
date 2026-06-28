@@ -5,12 +5,12 @@
                 data-name="{{ $category->name }}"
                 data-color="{{ $category->color }}"
                 title="Editar">
-            <i class="bi bi-pencil"></i>
+            <i class="fas fa-edit"></i>
         </button>
         <button class="btn btn-sm btn-outline-danger delete-category"
                 data-id="{{ $category->id }}"
                 title="Eliminar">
-            <i class="bi bi-trash"></i>
+            <i class="fas fa-trash-alt"></i>
         </button>
     @else
         <span class="text-muted small">No editable</span>

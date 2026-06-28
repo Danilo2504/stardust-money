@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreExpenseSplitRequest;
-use App\Http\Requests\UpdateExpenseSplitRequest;
 use App\Models\ExpenseSplit;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class ExpenseSplitController extends Controller
 {
@@ -16,9 +15,15 @@ class ExpenseSplitController extends Controller
         return response()->json($splits);
     }
 
-    public function store(StoreExpenseSplitRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $split = ExpenseSplit::create($request->validated());
+        $data = $request->validate([
+            'expense_id' => 'required|exists:expenses,id',
+            'person_name' => 'required|string|max:255',
+            'amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $split = ExpenseSplit::create($data);
 
         return response()->json($split, 201);
     }
@@ -28,9 +33,15 @@ class ExpenseSplitController extends Controller
         return response()->json($expenseSplit);
     }
 
-    public function update(UpdateExpenseSplitRequest $request, ExpenseSplit $expenseSplit): JsonResponse
+    public function update(Request $request, ExpenseSplit $expenseSplit): JsonResponse
     {
-        $expenseSplit->update($request->validated());
+        $data = $request->validate([
+            'expense_id' => 'required|exists:expenses,id',
+            'person_name' => 'required|string|max:255',
+            'amount' => 'nullable|numeric|min:0',
+        ]);
+
+        $expenseSplit->update($data);
 
         return response()->json($expenseSplit);
     }

@@ -21,6 +21,8 @@ $(document).ready(function() {
         order: [[0, 'asc']]
     });
 
+    sbDatatableProcessing(table);
+
     window.addEventListener('recurring-expense-saved', function () {
         table.draw(false);
     });

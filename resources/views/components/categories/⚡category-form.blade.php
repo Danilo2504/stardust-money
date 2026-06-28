@@ -115,8 +115,8 @@ new class extends Component
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cancelar
         </button>
-        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
-            <i class="bi bi-check-lg me-1"></i>
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+            <i class="fas fa-check me-1"></i>
             <span>{{ $categoryId ? 'Actualizar' : 'Crear' }}</span>
             <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>

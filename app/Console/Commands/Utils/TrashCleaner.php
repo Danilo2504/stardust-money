@@ -15,8 +15,8 @@ class TrashCleaner extends Command
      */
     public function handle()
     {
-        $chunkSize = $this->argument('chunkSize') ?? 1000; // Número de registros a procesar por lote
-        $model = $this->argument('model');
+        $chunkSize = $this->option('chunkSize') ?? 1000; // Número de registros a procesar por lote
+        $model = $this->option('model');
 
         $this->info('Starting trash cleaner...');
         logger()->info('Starting trash cleaner...', ['chunkSize' => $chunkSize, 'model' => $model]);

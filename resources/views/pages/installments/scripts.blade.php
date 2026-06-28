@@ -19,6 +19,8 @@ $(document).ready(function() {
         order: [[0, 'asc']]
     });
 
+    sbDatatableProcessing(table);
+
     window.addEventListener('installment-group-saved', function () {
         table.draw(false);
     });

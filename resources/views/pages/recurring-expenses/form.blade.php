@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="recurringExpenseModalLabel">
-                    <i class="bi bi-arrow-repeat me-2 text-primary"></i>
+                    <i class="fas fa-sync-alt me-2 text-primary"></i>
                     <span id="recurringExpenseModalTitle">Nueva plantilla</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>

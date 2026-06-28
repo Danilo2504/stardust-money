@@ -19,6 +19,8 @@ $(document).ready(function() {
         order: [[2, 'desc']]
     });
 
+    sbDatatableProcessing(table);
+
     window.addEventListener('shared-report-saved', function () {
         table.draw(false);
     });
@@ -58,6 +60,20 @@ $(document).ready(function() {
                 alert('No se pudo eliminar el reporte.');
             }
         });
+    });
+
+    $('#shared-reports-table').on('click', '.export-report-csv', function() {
+        let id = $(this).data('id');
+        let iframe = $('<iframe>', {
+            src: '{{ url("shared-reports") }}/' + id + '/export',
+            css: { display: 'none' }
+        });
+
+        $('body').append(iframe);
+
+        setTimeout(function() {
+            iframe.remove();
+        }, 5000);
     });
 });
 </script>

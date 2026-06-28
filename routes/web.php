@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('shared-reports/data', [SharedReportController::class, 'data'])
         ->name('shared-reports.data');
+    Route::get('shared-reports/{shared_report}/export', [SharedReportController::class, 'export'])
+        ->name('shared-reports.export');
     Route::resource('shared-reports', SharedReportController::class)
         ->only(['index', 'store', 'update', 'destroy']);
 });

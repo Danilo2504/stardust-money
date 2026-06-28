@@ -26,8 +26,6 @@ class SharedReport extends BaseModel
         'expires_at',
     ];
 
-    public $timestamps = false;
-
     protected $casts = [
         'filters' => 'json',
         'expires_at' => 'datetime',

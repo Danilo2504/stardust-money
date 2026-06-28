@@ -32,6 +32,8 @@ $(document).ready(function() {
         }
     });
 
+    sbDatatableProcessing(table);
+
     $('#btn-filter').on('click', function() {
         table.draw();
     });
@@ -81,7 +83,7 @@ $(document).ready(function() {
             },
             error: function() {
                 alert('No se pudo confirmar el gasto.');
-                $btn.prop('disabled', false).html('<i class="bi bi-check-lg"></i>');
+                $btn.prop('disabled', false).html('<i class="fas fa-check"></i>');
             }
         });
     });

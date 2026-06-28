@@ -109,9 +109,22 @@ class Expense extends BaseModel
             ->orderBy('expenses.created_at', 'desc');
     }
 
-    public function generateCode(): string
+    public static function generateCode(string $userId): string
     {
-        return str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+        $attempts = 0;
+        $maxAttempts = 10;
+
+        do {
+            $code = str_pad((string) random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+            $exists = static::where('user_id', $userId)->where('code', $code)->exists();
+            $attempts++;
+        } while ($exists && $attempts < $maxAttempts);
+
+        if ($exists) {
+            throw new \RuntimeException('No se pudo generar un código de gasto único.');
+        }
+
+        return $code;
     }
 
     #[Scope]

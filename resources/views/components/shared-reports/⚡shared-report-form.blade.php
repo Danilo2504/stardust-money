@@ -118,7 +118,7 @@ new class extends Component
 
 <form wire:submit="save">
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-card-text me-2"></i>Información</h6>
+        <h6 class="form-section-title"><i class="fas fa-file-alt me-2"></i>Información</h6>
         <div class="mb-3">
             <label class="form-label" for="report-label">Etiqueta</label>
             <input type="text"
@@ -145,7 +145,7 @@ new class extends Component
     </div>
 
     <div class="form-section mb-3">
-        <h6 class="form-section-title"><i class="bi bi-funnel me-2"></i>Filtros del reporte</h6>
+        <h6 class="form-section-title"><i class="fas fa-filter me-2"></i>Filtros del reporte</h6>
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label" for="report-type">Tipo</label>
@@ -205,8 +205,8 @@ new class extends Component
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
             Cancelar
         </button>
-        <button type="submit" class="btn btn-accent" wire:loading.attr="disabled">
-            <i class="bi bi-check-lg me-1"></i>
+        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled">
+            <i class="fas fa-check me-1"></i>
             <span>{{ $sharedReportId ? 'Guardar cambios' : 'Crear reporte' }}</span>
             <span wire:loading class="spinner-border spinner-border-sm ms-1" role="status" aria-hidden="true"></span>
         </button>
