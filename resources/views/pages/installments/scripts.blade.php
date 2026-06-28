@@ -29,7 +29,7 @@ $(document).ready(function() {
         let id = $(this).data('id');
 
         document.getElementById('installmentGroupModalTitle').textContent = 'Editar grupo de cuotas';
-        window.dispatchEvent(new CustomEvent('edit-installment-group', { detail: id }));
+        window.dispatchEvent(new CustomEvent('edit-installment-group', { detail: [id] }));
 
         let modal = new bootstrap.Modal(document.getElementById('installmentGroupModal'));
         modal.show();

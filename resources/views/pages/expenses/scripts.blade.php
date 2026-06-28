@@ -92,7 +92,7 @@ $(document).ready(function() {
         let id = $(this).data('id');
 
         document.getElementById('expenseModalTitle').textContent = 'Editar gasto';
-        window.dispatchEvent(new CustomEvent('edit-expense', { detail: id }));
+        window.dispatchEvent(new CustomEvent('edit-expense', { detail: [id] }));
 
         let modal = new bootstrap.Modal(document.getElementById('expenseModal'));
         modal.show();

@@ -153,7 +153,7 @@ new class extends Component
                 @enderror
             </div>
 
-            <div class="col-md-6">
+            <div class="col-12">
                 <label class="form-label" for="recurring-category">Categoría</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-folder"></i></span>
@@ -211,7 +211,7 @@ new class extends Component
         <h6 class="form-section-title"><i class="fas fa-calendar-alt me-2"></i>Programación</h6>
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label" for="recurring-next-due">Próxima fecha</label>
+                <label class="form-label" for="recurring-next-due">Fecha de programación</label>
                 <input type="date"
                        id="recurring-next-due"
                        wire:model="next_due_date"

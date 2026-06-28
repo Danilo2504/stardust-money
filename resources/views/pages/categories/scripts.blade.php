@@ -35,7 +35,7 @@ $(document).ready(function() {
 
         $('#categoryModalTitle').text('Editar categoría');
 
-        window.dispatchEvent(new CustomEvent('load-category', { detail: id }));
+        window.dispatchEvent(new CustomEvent('load-category', { detail: [id] }));
 
         let modal = new bootstrap.Modal(document.getElementById('categoryModal'));
         modal.show();

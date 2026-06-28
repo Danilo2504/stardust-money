@@ -31,7 +31,7 @@ $(document).ready(function() {
         let id = $(this).data('id');
 
         document.getElementById('recurringExpenseModalTitle').textContent = 'Editar plantilla';
-        window.dispatchEvent(new CustomEvent('edit-recurring-expense', { detail: id }));
+        window.dispatchEvent(new CustomEvent('edit-recurring-expense', { detail: [id] }));
 
         let modal = new bootstrap.Modal(document.getElementById('recurringExpenseModal'));
         modal.show();

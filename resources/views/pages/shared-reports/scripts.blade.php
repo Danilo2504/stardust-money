@@ -38,7 +38,7 @@ $(document).ready(function() {
         let id = $(this).data('id');
 
         document.getElementById('sharedReportModalTitle').textContent = 'Editar reporte compartido';
-        window.dispatchEvent(new CustomEvent('edit-shared-report', { detail: id }));
+        window.dispatchEvent(new CustomEvent('edit-shared-report', { detail: [id] }));
 
         let modal = new bootstrap.Modal(document.getElementById('sharedReportModal'));
         modal.show();
